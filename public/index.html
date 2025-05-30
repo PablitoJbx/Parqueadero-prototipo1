@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parqueadero Prototipo</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; background: #f4f4f4; }
+    h1 { color: #2c3e50; }
+    form, .vehiculos { background: #fff; padding: 1rem; margin-bottom: 2rem; border-radius: 8px; box-shadow: 0 2px 8px #0001; }
+    label { display: block; margin-top: 1rem; }
+    input, select { padding: 0.5rem; margin-top: 0.5rem; width: 100%; }
+    button { margin-top: 1rem; padding: 0.5rem 1rem; background: #2980b9; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #3498db; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.5rem; border-bottom: 1px solid #ddd; }
+    th { background: #2980b9; color: #fff; }
+  </style>
+</head>
+<body>
+  <h1>Sistema de Parqueadero</h1>
+
+  <form id="entradaForm">
+    <h2>Registrar Entrada</h2>
+    <label>Placa:
+      <input type="text" id="placaEntrada" required maxlength="10">
+    </label>
+    <label>Tipo:
+      <select id="tipoEntrada" required>
+        <option value="carro">Carro</option>
+        <option value="moto">Moto</option>
+      </select>
+    </label>
+    <button type="submit">Registrar Entrada</button>
+  </form>
+
+  <form id="salidaForm">
+    <h2>Registrar Salida</h2>
+    <label>Placa:
+      <input type="text" id="placaSalida" required maxlength="10">
+    </label>
+    <button type="submit">Registrar Salida</button>
+  </form>
+
+  <div class="vehiculos">
+    <h2>Vehículos en el Parqueadero</h2>
+    <table id="tablaVehiculos">
+      <thead>
+        <tr><th>Placa</th><th>Tipo</th><th>Hora Entrada</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const api = '';
+    async function cargarVehiculos() {
+      const res = await fetch(api + '/parqueadero');
+      const vehiculos = await res.json();
+      const tbody = document.querySelector('#tablaVehiculos tbody');
+      tbody.innerHTML = vehiculos.map(v => `<tr><td>${v.placa}</td><td>${v.tipo}</td><td>${new Date(v.horaEntrada).toLocaleString()}</td></tr>`).join('');
+    }
+    document.getElementById('entradaForm').onsubmit = async e => {
+      e.preventDefault();
+      const placa = document.getElementById('placaEntrada').value;
+      const tipo = document.getElementById('tipoEntrada').value;
+      await fetch(api + '/entrada', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ placa, tipo })
+      });
+      cargarVehiculos();
+      e.target.reset();
+    };
+    document.getElementById('salidaForm').onsubmit = async e => {
+      e.preventDefault();
+      const placa = document.getElementById('placaSalida').value;
+      await fetch(api + '/salida', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ placa })
+      });
+      cargarVehiculos();
+      e.target.reset();
+    };
+    cargarVehiculos();
+    setInterval(cargarVehiculos, 10000);
+  </script>
+</body>
+</html>
