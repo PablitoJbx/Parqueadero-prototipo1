@@ -31,6 +31,21 @@
     th, td { padding: 0.7rem; border-bottom: 1px solid #dbe6f3; text-align: center; }
     th { background: #2980b9; color: #fff; font-weight: 700; }
     tr:last-child td { border-bottom: none; }
+    .spinner {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border: 3px solid #2980b9;
+      border-top: 3px solid #fff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
     @media (max-width: 700px) {
       .container { padding: 1rem; }
       .logo-title { font-size: 1.3rem; }
@@ -80,25 +95,35 @@
     </div>
   </div>
   <script>
-    const api = '';
+    const api = ''; // Si frontend y backend están juntos, dejar vacío. Si están separados, poner la URL del backend.
+    function mostrarCargando(msg) {
+      document.getElementById('tablaMsg').innerHTML = `<span class="spinner"></span>${msg}`;
+      document.getElementById('tablaMsg').className = 'success';
+    }
     async function cargarVehiculos() {
+      mostrarCargando('Cargando vehículos...');
       try {
         const res = await fetch(api + '/parqueadero');
+        if (!res.ok) throw new Error('No se pudo cargar');
         const vehiculos = await res.json();
         const tbody = document.querySelector('#tablaVehiculos tbody');
         tbody.innerHTML = '';
         if (vehiculos.length === 0) {
           document.getElementById('tablaMsg').textContent = 'No hay vehículos en el parqueadero.';
+          document.getElementById('tablaMsg').className = '';
         } else {
           document.getElementById('tablaMsg').textContent = '';
-          vehiculos.forEach(v => {
+          vehiculos.forEach((v, i) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `<td>${v.placa}</td><td>${v.tipo}</td><td>${new Date(v.horaEntrada).toLocaleString()}</td>`;
+            tr.style.opacity = 0;
+            setTimeout(() => { tr.style.transition = 'opacity 0.5s'; tr.style.opacity = 1; }, 100 * i);
             tbody.appendChild(tr);
           });
         }
       } catch (err) {
         document.getElementById('tablaMsg').textContent = 'Error al cargar vehículos.';
+        document.getElementById('tablaMsg').className = 'error';
       }
     }
     document.getElementById('entradaForm').onsubmit = async e => {
@@ -114,6 +139,8 @@
         return;
       }
       try {
+        msg.textContent = 'Registrando...';
+        msg.className = 'success';
         const res = await fetch(api + '/entrada', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -146,6 +173,8 @@
         return;
       }
       try {
+        msg.textContent = 'Procesando salida...';
+        msg.className = 'success';
         const res = await fetch(api + '/salida', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
