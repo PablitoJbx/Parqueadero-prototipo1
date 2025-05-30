@@ -11,10 +11,16 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// Conexión a MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/parqueadero', {
+// Conexión a MongoDB Atlas o local
+const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/parqueadero';
+mongoose.connect(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true
+}).then(() => {
+  console.log('Conectado a MongoDB:', uri.includes('mongodb+srv') ? 'Atlas' : uri);
+}).catch(err => {
+  console.error('Error de conexión a MongoDB:', err.message);
+  process.exit(1);
 });
 
 // Endpoint para registrar entrada de vehículo
@@ -34,7 +40,7 @@ app.post('/salida', async (req, res) => {
   try {
     const { placa } = req.body;
     const vehiculo = await Vehiculo.findOneAndUpdate(
-      { placa, horaSalida: null },
+      { placa: placa, horaSalida: null },
       { horaSalida: new Date() },
       { new: true }
     );

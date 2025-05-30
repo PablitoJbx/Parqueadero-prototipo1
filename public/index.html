@@ -130,9 +130,12 @@
     <!-- Formularios y tabla funcionales -->
     <div id="mainApp">
       <h2 style="text-align:center;">Mapa del Parqueadero</h2>
+      <div id="infoEntrada" style="text-align:center;margin:1rem 0 2rem 0;font-weight:bold;color:#2980b9;">
+        Para registrar la entrada de un vehículo, haz clic en un espacio vacío del mapa.
+      </div>
       <div class="parking-map" id="parkingMap"></div>
       <div id="parkingMsg" style="text-align:center;"></div>
-      <form id="entradaForm">
+      <form id="entradaForm" style="display:none;">
         <h3>Registrar Entrada</h3>
         <label for="placaEntrada">Placa:</label>
         <input id="placaEntrada" maxlength="10" required pattern="[A-Z0-9]{5,10}" placeholder="Ej: ABC123" />
