@@ -422,6 +422,10 @@
     function showMainApp() {
       document.getElementById('loginRegisterPanel').style.display = 'none';
       document.getElementById('appRoot').style.display = '';
+      showPanel('panelMapa');
+      setTimeout(() => {
+        if (typeof document.renderParkingMap === 'function') document.renderParkingMap();
+      }, 100);
     }
     // Eventos de navegación login/register
     document.getElementById('toRegister').onclick = showRegister;
