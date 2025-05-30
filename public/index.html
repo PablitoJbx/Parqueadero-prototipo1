@@ -242,12 +242,22 @@
       document.getElementById('loginForm').style.display = 'none';
       document.getElementById('registerForm').style.display = '';
       document.getElementById('authTitle').textContent = 'Registro';
+      // Limpiar mensajes y campos
+      document.getElementById('loginMsg').textContent = '';
+      document.getElementById('registerMsg').textContent = '';
+      document.getElementById('registerForm').reset();
+      document.getElementById('registerUser').focus();
     };
     document.getElementById('showLogin').onclick = e => {
       e.preventDefault();
       document.getElementById('loginForm').style.display = '';
       document.getElementById('registerForm').style.display = 'none';
       document.getElementById('authTitle').textContent = 'Iniciar Sesión';
+      // Limpiar mensajes y campos
+      document.getElementById('registerMsg').textContent = '';
+      document.getElementById('loginMsg').textContent = '';
+      document.getElementById('loginForm').reset();
+      document.getElementById('loginUser').focus();
     };
     document.getElementById('loginForm').onsubmit = e => {
       e.preventDefault();
