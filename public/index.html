@@ -122,13 +122,49 @@
     </div>
     <!-- Menú superior para login, registro, historial y configuración -->
     <div class="menu-superior">
+      <div id="menu-session">
+        <button id='btnLogin'>Iniciar sesión</button>
+        <button id='btnRegister'>Registrarse</button>
+        <button id='btnLogout' style='display:none;'>Cerrar sesión</button>
+      </div>
       <div>
         <button id='btnHistorial'>Historial</button>
         <button id='btnTarifas'>Configurar Tarifas</button>
       </div>
     </div>
-    <!-- Formularios y tabla funcionales -->
-    <div id="mainApp">
+    <!-- Formularios de login y registro -->
+    <div id="loginRegisterPanel" style="display:none;">
+      <div class="login-register" id="loginPanel" style="display:none;">
+        <h2>Iniciar sesión</h2>
+        <form id="loginForm">
+          <label for="loginUser">Usuario</label>
+          <input id="loginUser" required maxlength="30" autocomplete="username" />
+          <label for="loginPass">Contraseña</label>
+          <input id="loginPass" type="password" required maxlength="30" autocomplete="current-password" />
+          <button type="submit">Entrar</button>
+          <div id="loginMsg"></div>
+        </form>
+        <div style="margin-top:1rem;text-align:center;">
+          ¿No tienes cuenta? <a href="#" id="toRegister">Regístrate</a>
+        </div>
+      </div>
+      <div class="login-register" id="registerPanel" style="display:none;">
+        <h2>Registro</h2>
+        <form id="registerForm">
+          <label for="registerUser">Usuario</label>
+          <input id="registerUser" required maxlength="30" autocomplete="username" />
+          <label for="registerPass">Contraseña</label>
+          <input id="registerPass" type="password" required maxlength="30" autocomplete="new-password" />
+          <button type="submit">Registrarse</button>
+          <div id="registerMsg"></div>
+        </form>
+        <div style="margin-top:1rem;text-align:center;">
+          ¿Ya tienes cuenta? <a href="#" id="toLogin">Inicia sesión</a>
+        </div>
+      </div>
+    </div>
+    <!-- Main app (oculto si no hay sesión) -->
+    <div id="mainApp" style="display:none;">
       <h2 style="text-align:center;">Mapa del Parqueadero</h2>
       <div id="infoEntrada" style="text-align:center;margin:1rem 0 2rem 0;font-weight:bold;color:#2980b9;">
         Para registrar la entrada de un vehículo, haz clic en un espacio vacío del mapa.
@@ -165,7 +201,131 @@
     </div>
   </div>
   <script>
-    const api = ''; // Si frontend y backend están juntos, dejar vacío. Si están separados, poner la URL del backend.
+    const api = '';
+    // --- Login/Register logic ---
+    function showLogin() {
+      document.getElementById('loginRegisterPanel').style.display = '';
+      document.getElementById('loginPanel').style.display = '';
+      document.getElementById('registerPanel').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'none';
+    }
+    function showRegister() {
+      document.getElementById('loginRegisterPanel').style.display = '';
+      document.getElementById('loginPanel').style.display = 'none';
+      document.getElementById('registerPanel').style.display = '';
+      document.getElementById('mainApp').style.display = 'none';
+    }
+    function showMainApp() {
+      document.getElementById('loginRegisterPanel').style.display = 'none';
+      document.getElementById('mainApp').style.display = '';
+    }
+    // Eventos de navegación login/register
+    document.getElementById('btnLogin').onclick = showLogin;
+    document.getElementById('btnRegister').onclick = showRegister;
+    document.getElementById('toRegister').onclick = showRegister;
+    document.getElementById('toLogin').onclick = showLogin;
+    // Login
+    document.getElementById('loginForm').onsubmit = async e => {
+      e.preventDefault();
+      const user = document.getElementById('loginUser').value.trim();
+      const pass = document.getElementById('loginPass').value;
+      const msg = document.getElementById('loginMsg');
+      msg.textContent = '';
+      msg.className = '';
+      try {
+        msg.textContent = 'Verificando...';
+        const res = await fetch(api + '/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: user, password: pass })
+        });
+        const data = await res.json();
+        if (res.ok && data.token) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('rol', data.rol);
+          msg.textContent = '¡Bienvenido!';
+          msg.className = 'success';
+          setTimeout(() => {
+            showMainApp();
+            updateMenuSession();
+            document.renderParkingMap();
+            cargarVehiculos();
+          }, 700);
+        } else {
+          msg.textContent = data.error || 'Error de autenticación';
+          msg.className = 'error';
+        }
+      } catch {
+        msg.textContent = 'Error de red.';
+        msg.className = 'error';
+      }
+    };
+    // Register
+    document.getElementById('registerForm').onsubmit = async e => {
+      e.preventDefault();
+      const user = document.getElementById('registerUser').value.trim();
+      const pass = document.getElementById('registerPass').value;
+      const msg = document.getElementById('registerMsg');
+      msg.textContent = '';
+      msg.className = '';
+      if (!user.match(/^[a-zA-Z0-9_]{3,30}$/)) {
+        msg.textContent = 'Usuario inválido (3-30 letras, números o _).';
+        msg.className = 'error';
+        return;
+      }
+      if (pass.length < 4) {
+        msg.textContent = 'Contraseña muy corta (mínimo 4 caracteres).';
+        msg.className = 'error';
+        return;
+      }
+      try {
+        msg.textContent = 'Registrando...';
+        const res = await fetch(api + '/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: user, password: pass })
+        });
+        const data = await res.json();
+        if (res.ok && data.message) {
+          msg.textContent = 'Usuario registrado. Ahora inicia sesión.';
+          msg.className = 'success';
+          setTimeout(showLogin, 1000);
+        } else {
+          msg.textContent = data.error || 'Error al registrar.';
+          msg.className = 'error';
+        }
+      } catch {
+        msg.textContent = 'Error de red.';
+        msg.className = 'error';
+      }
+    };
+    // Logout
+    document.getElementById('btnLogout').onclick = () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('rol');
+      showLogin();
+      updateMenuSession();
+    };
+    // Mostrar/ocultar menú según sesión
+    function updateMenuSession() {
+      const token = localStorage.getItem('token');
+      const rol = localStorage.getItem('rol');
+      document.getElementById('btnLogin').style.display = token ? 'none' : '';
+      document.getElementById('btnRegister').style.display = token ? 'none' : '';
+      document.getElementById('btnLogout').style.display = token ? '' : 'none';
+      document.getElementById('btnHistorial').style.display = rol === 'admin' ? '' : 'none';
+      document.getElementById('btnTarifas').style.display = rol === 'admin' ? '' : 'none';
+      document.getElementById('mainApp').style.display = token ? '' : 'none';
+      document.getElementById('loginRegisterPanel').style.display = token ? 'none' : '';
+    }
+    // Inicialización: mostrar login o app según sesión
+    if (localStorage.getItem('token')) {
+      showMainApp();
+    } else {
+      showLogin();
+    }
+    updateMenuSession();
+    // --- Existing code ---
     function mostrarCargando(msg) {
       document.getElementById('tablaMsg').innerHTML = `<span class="spinner"></span>${msg}`;
       document.getElementById('tablaMsg').className = 'success';
