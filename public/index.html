@@ -203,86 +203,118 @@
   </style>
 </head>
 <body>
-    <div class="sidebar">
-      <div class="logo">
-        <div class="logo-icon">
-          <!-- Simple parking logo SVG -->
-          <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#fff"/><rect x="14" y="14" width="20" height="20" rx="6" fill="#2980b9"/><text x="24" y="32" text-anchor="middle" font-size="18" fill="#fff" font-family="Arial" font-weight="bold">P</text></svg>
-        </div>
-        <div class="logo-title">Parqueadero</div>
-      </div>
-      <div class="sidebar-menu">
-        <button id="menuMapa" class="active"><span class="icon">🗺️</span>Mapa del parqueadero</button>
-        <button id="menuPagos"><span class="icon">💳</span>Pagos</button>
-        <button id="menuGestion"><span class="icon">🚗</span>Gestionar carros/motos</button>
-        <button id="menuLogout"><span class="icon">🚪</span>Cerrar sesión</button>
-      </div>
-      <div class="sidebar-footer">
-        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Foto programador">
-        <div class="dev-name">David Niño y equipo</div>
-        <div class="dev-desc">Desarrolladores del sistema de parqueadero profesional</div>
-      </div>
-    </div>
-    <div class="main-content">
-      <div id="panelMapa" class="panel">
-        <h2>Mapa del Parqueadero</h2>
-        <div id="infoEntrada" style="text-align:center;margin:1rem 0 2rem 0;font-weight:bold;color:#2980b9;">
-          Para registrar la entrada de un vehículo, haz clic en un espacio vacío del mapa.
-        </div>
-        <div class="parking-map" id="parkingMap"></div>
-        <div id="parkingMsg" style="text-align:center;"></div>
-      </div>
-      <div id="panelPagos" class="panel" style="display:none;">
-        <h2>Pagos</h2>
-        <div id="pagosContent">Selecciona un vehículo en el mapa para realizar el pago de salida.</div>
-      </div>
-      <div id="panelGestion" class="panel" style="display:none;">
-        <h2>Gestionar Carros/Motos</h2>
-        <form id="entradaForm">
-          <h3>Registrar Entrada</h3>
-          <label for="placaEntrada">Placa:</label>
-          <input id="placaEntrada" maxlength="10" required pattern="[A-Z0-9]{5,10}" placeholder="Ej: ABC123" />
-          <label for="tipoEntrada">Tipo:</label>
-          <select id="tipoEntrada">
-            <option value="carro">Carro</option>
-            <option value="moto">Moto</option>
-          </select>
-          <button type="submit">Registrar Entrada</button>
-          <div id="entradaMsg"></div>
+    <div id="loginRegisterPanel">
+      <div class="login-register" id="loginPanel">
+        <h2>Iniciar sesión</h2>
+        <form id="loginForm">
+          <label for="loginUser">Usuario</label>
+          <input id="loginUser" required maxlength="30" autocomplete="username" />
+          <label for="loginPass">Contraseña</label>
+          <input id="loginPass" type="password" required maxlength="30" autocomplete="current-password" />
+          <button type="submit">Entrar</button>
+          <div id="loginMsg"></div>
         </form>
-        <form id="salidaForm">
-          <h3>Registrar Salida</h3>
-          <label for="placaSalida">Placa:</label>
-          <input id="placaSalida" maxlength="10" required pattern="[A-Z0-9]{5,10}" placeholder="Ej: ABC123" />
-          <button type="submit">Registrar Salida</button>
-          <div id="salidaMsg"></div>
+        <div style="margin-top:1rem;text-align:center;">
+          ¿No tienes cuenta? <a href="#" id="toRegister">Regístrate</a>
+        </div>
+      </div>
+      <div class="login-register" id="registerPanel" style="display:none;">
+        <h2>Registro</h2>
+        <form id="registerForm">
+          <label for="registerUser">Usuario</label>
+          <input id="registerUser" required maxlength="30" autocomplete="username" />
+          <label for="registerPass">Contraseña</label>
+          <input id="registerPass" type="password" required maxlength="30" autocomplete="new-password" />
+          <button type="submit">Registrarse</button>
+          <div id="registerMsg"></div>
         </form>
-        <div class="vehiculos">
-          <h3>Vehículos en el Parqueadero</h3>
-          <table id="tablaVehiculos">
-            <thead><tr><th>Placa</th><th>Tipo</th><th>Hora de Entrada</th></tr></thead>
-            <tbody></tbody>
-          </table>
-          <div id="tablaMsg"></div>
+        <div style="margin-top:1rem;text-align:center;">
+          ¿Ya tienes cuenta? <a href="#" id="toLogin">Inicia sesión</a>
         </div>
       </div>
     </div>
-    <!-- Modal de métodos de pago -->
-    <div id="modalPago">
-      <div class="modal-content">
-        <h3 style="margin-top:0;">Selecciona método de pago</h3>
-        <div id="paymentAmount" style="font-size:1.2em;font-weight:600;margin-bottom:1.2em;"></div>
-        <div style="display:flex;gap:1.2em;justify-content:center;flex-wrap:wrap;">
-          <button class="pay-method" data-method="efectivo" style="background:#27ae60;"><span style="font-size:2em;">💵</span><br>Efectivo</button>
-          <button class="pay-method" data-method="tarjeta" style="background:#2980b9;"><span style="font-size:2em;">💳</span><br>Tarjeta</button>
-          <button class="pay-method" data-method="nequi" style="background:#a259e6;"><span style="font-size:2em;">📱</span><br>Nequi</button>
-          <button class="pay-method" data-method="daviplata" style="background:#e74c3c;"><span style="font-size:2em;">🏦</span><br>Daviplata</button>
+    <div id="appRoot" style="display:none;">
+      <div class="sidebar">
+        <div class="logo">
+          <div class="logo-icon">
+            <!-- Simple parking logo SVG -->
+            <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#fff"/><rect x="14" y="14" width="20" height="20" rx="6" fill="#2980b9"/><text x="24" y="32" text-anchor="middle" font-size="18" fill="#fff" font-family="Arial" font-weight="bold">P</text></svg>
+          </div>
+          <div class="logo-title">Parqueadero</div>
         </div>
-        <button id="closePaymentModal" style="margin-top:1.5em;background:#bbb;">Cancelar</button>
+        <div class="sidebar-menu">
+          <button id="menuMapa" class="active"><span class="icon">🗺️</span>Mapa del parqueadero</button>
+          <button id="menuPagos"><span class="icon">💳</span>Pagos</button>
+          <button id="menuGestion"><span class="icon">🚗</span>Gestionar carros/motos</button>
+          <button id="menuLogout"><span class="icon">🚪</span>Cerrar sesión</button>
+        </div>
+        <div class="sidebar-footer">
+          <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Foto programador">
+          <div class="dev-name">David Niño y equipo</div>
+          <div class="dev-desc">Desarrolladores del sistema de parqueadero profesional</div>
+        </div>
       </div>
+      <div class="main-content">
+        <div id="panelMapa" class="panel">
+          <h2>Mapa del Parqueadero</h2>
+          <div id="infoEntrada" style="text-align:center;margin:1rem 0 2rem 0;font-weight:bold;color:#2980b9;">
+            Para registrar la entrada de un vehículo, haz clic en un espacio vacío del mapa.
+          </div>
+          <div class="parking-map" id="parkingMap"></div>
+          <div id="parkingMsg" style="text-align:center;"></div>
+        </div>
+        <div id="panelPagos" class="panel" style="display:none;">
+          <h2>Pagos</h2>
+          <div id="pagosContent">Selecciona un vehículo en el mapa para realizar el pago de salida.</div>
+        </div>
+        <div id="panelGestion" class="panel" style="display:none;">
+          <h2>Gestionar Carros/Motos</h2>
+          <form id="entradaForm">
+            <h3>Registrar Entrada</h3>
+            <label for="placaEntrada">Placa:</label>
+            <input id="placaEntrada" maxlength="10" required pattern="[A-Z0-9]{5,10}" placeholder="Ej: ABC123" />
+            <label for="tipoEntrada">Tipo:</label>
+            <select id="tipoEntrada">
+              <option value="carro">Carro</option>
+              <option value="moto">Moto</option>
+            </select>
+            <button type="submit">Registrar Entrada</button>
+            <div id="entradaMsg"></div>
+          </form>
+          <form id="salidaForm">
+            <h3>Registrar Salida</h3>
+            <label for="placaSalida">Placa:</label>
+            <input id="placaSalida" maxlength="10" required pattern="[A-Z0-9]{5,10}" placeholder="Ej: ABC123" />
+            <button type="submit">Registrar Salida</button>
+            <div id="salidaMsg"></div>
+          </form>
+          <div class="vehiculos">
+            <h3>Vehículos en el Parqueadero</h3>
+            <table id="tablaVehiculos">
+              <thead><tr><th>Placa</th><th>Tipo</th><th>Hora de Entrada</th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <div id="tablaMsg"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Modal de métodos de pago -->
+      <div id="modalPago">
+        <div class="modal-content">
+          <h3 style="margin-top:0;">Selecciona método de pago</h3>
+          <div id="paymentAmount" style="font-size:1.2em;font-weight:600;margin-bottom:1.2em;"></div>
+          <div style="display:flex;gap:1.2em;justify-content:center;flex-wrap:wrap;">
+            <button class="pay-method" data-method="efectivo" style="background:#27ae60;"><span style="font-size:2em;">💵</span><br>Efectivo</button>
+            <button class="pay-method" data-method="tarjeta" style="background:#2980b9;"><span style="font-size:2em;">💳</span><br>Tarjeta</button>
+            <button class="pay-method" data-method="nequi" style="background:#a259e6;"><span style="font-size:2em;">📱</span><br>Nequi</button>
+            <button class="pay-method" data-method="daviplata" style="background:#e74c3c;"><span style="font-size:2em;">🏦</span><br>Daviplata</button>
+          </div>
+          <button id="closePaymentModal" style="margin-top:1.5em;background:#bbb;">Cancelar</button>
+        </div>
+      </div>
+      <div id="loader"><div class="spinner"></div></div>
+      <div id="toast"></div>
     </div>
-    <div id="loader"><div class="spinner"></div></div>
-    <div id="toast"></div>
   <script>
     const api = '';
     // --- Login/Register logic ---
@@ -290,21 +322,19 @@
       document.getElementById('loginRegisterPanel').style.display = '';
       document.getElementById('loginPanel').style.display = '';
       document.getElementById('registerPanel').style.display = 'none';
-      document.getElementById('mainApp').style.display = 'none';
+      document.getElementById('appRoot').style.display = 'none';
     }
     function showRegister() {
       document.getElementById('loginRegisterPanel').style.display = '';
       document.getElementById('loginPanel').style.display = 'none';
       document.getElementById('registerPanel').style.display = '';
-      document.getElementById('mainApp').style.display = 'none';
+      document.getElementById('appRoot').style.display = 'none';
     }
     function showMainApp() {
       document.getElementById('loginRegisterPanel').style.display = 'none';
-      document.getElementById('mainApp').style.display = '';
+      document.getElementById('appRoot').style.display = '';
     }
     // Eventos de navegación login/register
-    document.getElementById('btnLogin').onclick = showLogin;
-    document.getElementById('btnRegister').onclick = showRegister;
     document.getElementById('toRegister').onclick = showRegister;
     document.getElementById('toLogin').onclick = showLogin;
     // Login
