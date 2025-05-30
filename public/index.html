@@ -278,6 +278,11 @@
       e.preventDefault();
       const user = document.getElementById('registerUser').value;
       const pass = document.getElementById('registerPass').value;
+      if (!user || !pass) {
+        document.getElementById('registerMsg').textContent = 'Debes ingresar usuario y contraseña';
+        document.getElementById('registerMsg').className = 'error';
+        return;
+      }
       if (localStorage.getItem('user_' + user)) {
         document.getElementById('registerMsg').textContent = 'El usuario ya existe';
         document.getElementById('registerMsg').className = 'error';
@@ -285,6 +290,8 @@
         localStorage.setItem('user_' + user, pass);
         document.getElementById('registerMsg').textContent = 'Usuario registrado. Ahora puedes iniciar sesión.';
         document.getElementById('registerMsg').className = 'success';
+        // Opcional: cambiar automáticamente a login después de registrar
+        // setTimeout(() => document.getElementById('showLogin').click(), 1200);
       }
     };
     // --- Parking map logic ---
