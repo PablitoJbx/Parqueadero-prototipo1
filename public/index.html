@@ -87,6 +87,28 @@
     .space button.add { background: #27ae60; color: #fff; }
     .space button.remove { background: #e67e22; color: #fff; }
     .space button:disabled { background: #ccc; color: #fff; cursor: not-allowed; }
+    /* Estilos para el menú superior */
+    .menu-superior {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .menu-superior button {
+      background: #2980b9;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: background 0.2s;
+      margin-left: 0.5rem;
+    }
+    .menu-superior button:hover {
+      background: #3498db;
+    }
   </style>
 </head>
 <body>
@@ -97,6 +119,18 @@
         <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#fff"/><rect x="14" y="14" width="20" height="20" rx="6" fill="#2980b9"/><text x="24" y="32" text-anchor="middle" font-size="18" fill="#fff" font-family="Arial" font-weight="bold">P</text></svg>
       </div>
       <span class="logo-title">Parqueadero Prototipo</span>
+    </div>
+    <!-- Menú superior para login, registro, historial y configuración -->
+    <div class="menu-superior">
+      <div>
+        <button id='btnLogin'>Iniciar sesión</button>
+        <button id='btnRegister'>Registrarse</button>
+        <button id='btnLogout' style='display:none;'>Cerrar sesión</button>
+      </div>
+      <div>
+        <button id='btnHistorial'>Historial</button>
+        <button id='btnTarifas'>Configurar Tarifas</button>
+      </div>
     </div>
     <div id="mainApp">
       <h2 style="text-align:center;">Mapa del Parqueadero</h2>
@@ -208,41 +242,282 @@
     // --- Parking map logic ---
     const NUM_SPACES = 15;
     let parkingSpaces = Array(NUM_SPACES).fill(null);
+    const spaceLabels = [
+      'A1','A2','A3','A4','A5',
+      'B1','B2','B3','B4','B5',
+      'C1','C2','C3','C4','C5'
+    ];
+    // Guardar y cargar estado en localStorage para persistencia básica
+    function saveParkingState() {
+      localStorage.setItem('parkingSpaces', JSON.stringify(parkingSpaces));
+    }
+    function loadParkingState() {
+      const data = localStorage.getItem('parkingSpaces');
+      if (data) {
+        try {
+          const arr = JSON.parse(data);
+          if (Array.isArray(arr) && arr.length === NUM_SPACES) {
+            parkingSpaces = arr;
+          }
+        } catch {}
+      }
+    }
+
+    // Cambia la extensión de la imagen a la correcta
+    const CAR_IMAGE = 'car-sprite.png.jpg'; // Usa la imagen real en public
+    const MOTO_EMOJI = '🏍️';
+
+    function getCarImageHTML(idx) {
+      // Sprite: 5 autos por fila, 2 filas (ajustar si usas otra imagen)
+      const col = idx % 5;
+      const row = Math.floor(idx / 5);
+      const x = -col * 92; // 920px/10 autos = 92px por auto
+      const y = -row * 225; // 450px/2 filas = 225px por fila
+      return `<div style="width:60px;height:80px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+        <img src='${CAR_IMAGE}' style='width:460px;height:225px;object-fit:none;object-position:${x}px ${y}px;' alt='Carro'/>
+      </div>`;
+    }
+
+    // Obtener tarifas del backend (si hay token)
+    let tarifas = { carro: 2000, moto: 1000 };
+    async function fetchTarifas() {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        const res = await fetch('/tarifas', { headers: { Authorization: 'Bearer ' + token } });
+        if (res.ok) tarifas = await res.json();
+      } catch {}
+    }
+    // Llamar al cargar
+    fetchTarifas();
+
     function renderParkingMap() {
       const map = document.getElementById('parkingMap');
       map.innerHTML = '';
       parkingSpaces.forEach((car, idx) => {
         const div = document.createElement('div');
         div.className = 'space' + (car ? ' occupied' : '');
+        div.title = `Espacio ${spaceLabels[idx]}`;
+        div.innerHTML = `<div style='font-weight:bold;font-size:1.1em;'>${spaceLabels[idx]}</div>`;
         if (car) {
-          div.innerHTML = `<span class="placa">${car.placa}</span><span class="tipo">${car.tipo}</span><div class="actions"><button class="remove">Sacar</button></div>`;
-          div.querySelector('.remove').onclick = () => {
-            parkingSpaces[idx] = null;
-            renderParkingMap();
-            document.getElementById('parkingMsg').textContent = `Vehículo retirado del espacio ${idx+1}`;
+          if (car.tipo === 'carro') {
+            div.innerHTML += getCarImageHTML(idx);
+          } else {
+            div.innerHTML += `<div style='font-size:2em;margin:8px 0;'>${MOTO_EMOJI}</div>`;
+          }
+          div.innerHTML += `<span class='placa'>${car.placa}</span><span class='tipo'>${car.tipo}</span>`;
+          // Mostrar tiempo de parqueo
+          if (car.entrada) {
+            const minutos = Math.floor((Date.now() - car.entrada) / 60000);
+            div.innerHTML += `<div style='font-size:0.8em;color:#333;'>${minutos} min</div>`;
+          }
+          div.onclick = () => {
+            if (confirm(`¿Sacar vehículo ${car.placa} (${car.tipo}) del espacio ${spaceLabels[idx]}?`)) {
+              // Calcular tarifa usando tarifas configurables
+              const entrada = car.entrada || Date.now();
+              const minutos = Math.max(1, Math.ceil((Date.now() - entrada) / 60000));
+              let tarifa = 0;
+              if (car.tipo === 'carro') {
+                tarifa = Math.ceil(minutos / 60) * tarifas.carro;
+              } else {
+                tarifa = Math.ceil(minutos / 60) * tarifas.moto;
+              }
+              let metodo = prompt(`Tiempo: ${minutos} min\nTarifa: $${tarifa}\nSeleccione método de pago: efectivo, tarjeta, nequi, daviplata`).toLowerCase();
+              if (!['efectivo','tarjeta','nequi','daviplata'].includes(metodo)) {
+                alert('Método de pago no válido.');
+                return;
+              }
+              alert(`Pago de $${tarifa} realizado con ${metodo}. ¡Gracias!`);
+              parkingSpaces[idx] = null;
+              saveParkingState();
+              renderParkingMap();
+              document.getElementById('parkingMsg').textContent = `Vehículo retirado del espacio ${spaceLabels[idx]}`;
+            }
           };
         } else {
-          div.innerHTML = `<div class="actions"><button class="add">Agregar</button></div>`;
-          div.querySelector('.add').onclick = () => {
-            const placa = prompt('Placa del vehículo:').toUpperCase();
-            const tipo = prompt('Tipo (carro/moto):').toLowerCase();
-            if (!placa.match(/^[A-Z0-9]{5,10}$/) || (tipo !== 'carro' && tipo !== 'moto')) {
-              alert('Datos inválidos.');
+          div.onclick = () => {
+            const placa = prompt(`Placa del vehículo para ${spaceLabels[idx]}:`);
+            if (!placa) return;
+            const placaVal = placa.trim().toUpperCase();
+            const tipo = prompt('Tipo (carro/moto):');
+            if (!tipo) return;
+            const tipoVal = tipo.trim().toLowerCase();
+            if (!placaVal.match(/^[A-Z0-9]{5,10}$/) || (tipoVal !== 'carro' && tipoVal !== 'moto')) {
+              alert('Datos inválidos. Placa: 5-10 caracteres alfanuméricos. Tipo: carro o moto.');
               return;
             }
-            parkingSpaces[idx] = { placa, tipo };
+            // Validar que la placa no esté en otro espacio
+            if (parkingSpaces.some(s => s && s.placa === placaVal)) {
+              alert('Esa placa ya está registrada en otro espacio.');
+              return;
+            }
+            parkingSpaces[idx] = { placa: placaVal, tipo: tipoVal, entrada: Date.now() };
+            saveParkingState();
             renderParkingMap();
-            document.getElementById('parkingMsg').textContent = `Vehículo agregado al espacio ${idx+1}`;
+            document.getElementById('parkingMsg').textContent = `Vehículo agregado al espacio ${spaceLabels[idx]}`;
           };
         }
         map.appendChild(div);
       });
     }
+
+    // Inicializar estado y renderizar
+    loadParkingState();
     renderParkingMap();
     setInterval(cargarVehiculos, 10000);
     // Mostrar login/register al cargar
     document.getElementById('authBox').style.display = '';
     document.getElementById('mainApp').style.display = 'none';
+
+    // Mostrar/ocultar botones según sesión
+    function updateMenuSession() {
+      const token = localStorage.getItem('token');
+      const rol = localStorage.getItem('rol');
+      document.getElementById('btnLogin').style.display = token ? 'none' : '';
+      document.getElementById('btnRegister').style.display = token ? 'none' : '';
+      document.getElementById('btnLogout').style.display = token ? '' : 'none';
+      document.getElementById('btnHistorial').style.display = rol === 'admin' ? '' : 'none';
+      document.getElementById('btnTarifas').style.display = rol === 'admin' ? '' : 'none';
+    }
+
+    // Llamar al cargar y tras login/logout
+    renderMenu();
+    updateMenuSession();
+
+    // Lógica de login, registro y logout
+    function showLogin() {
+      const username = prompt('Usuario:');
+      const password = prompt('Contraseña:');
+      if (!username || !password) return;
+      fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.token) {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('rol', data.rol);
+            alert('Bienvenido ' + username);
+            updateMenuSession();
+          } else {
+            alert(data.error || 'Error de autenticación');
+          }
+        });
+    }
+    function showRegister() {
+      const username = prompt('Nuevo usuario:');
+      const password = prompt('Contraseña:');
+      if (!username || !password) return;
+      fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.message) {
+            alert('Usuario registrado. Ahora puedes iniciar sesión.');
+            updateMenuSession();
+          } else {
+            alert(data.error || 'Error al registrar');
+          }
+        });
+    }
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('rol');
+      alert('Sesión cerrada');
+      updateMenuSession();
+    }
+
+    // Menú de configuración de tarifas (solo admin)
+    function showTarifasConfig() {
+      const token = localStorage.getItem('token');
+      if (!token) return alert('Debes iniciar sesión como admin');
+      fetch('/tarifas', { headers: { Authorization: 'Bearer ' + token } })
+        .then(res => res.json())
+        .then(tarifas => {
+          const carro = prompt('Tarifa por hora para carro:', tarifas.carro);
+          const moto = prompt('Tarifa por hora para moto:', tarifas.moto);
+          if (!carro || !moto) return;
+          fetch('/tarifas', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: 'Bearer ' + token
+            },
+            body: JSON.stringify({ carro: Number(carro), moto: Number(moto) })
+          })
+          .then(res => res.json())
+          .then(nuevas => {
+            alert('Tarifas actualizadas');
+            window.location.reload();
+          });
+        });
+    }
+
+    // Mostrar historial de movimientos (solo admin)
+    function showHistorial() {
+      const token = localStorage.getItem('token');
+      if (!token) return alert('Debes iniciar sesión como admin');
+      fetch('/historial', { headers: { Authorization: 'Bearer ' + token } })
+        .then(res => res.json())
+        .then(historial => {
+          if (!Array.isArray(historial)) return alert('No autorizado o error');
+          let html = '<h3>Historial de Movimientos</h3>';
+          html += '<table style="width:100%;font-size:0.95em;"><tr><th>Placa</th><th>Tipo</th><th>Entrada</th><th>Salida</th></tr>';
+          historial.forEach(v => {
+            html += `<tr><td>${v.placa}</td><td>${v.tipo}</td><td>${v.horaEntrada ? new Date(v.horaEntrada).toLocaleString() : ''}</td><td>${v.horaSalida ? new Date(v.horaSalida).toLocaleString() : ''}</td></tr>`;
+          });
+          html += '</table>';
+          const div = document.createElement('div');
+          div.innerHTML = html;
+          div.style.background = '#fff';
+          div.style.padding = '1rem';
+          div.style.borderRadius = '12px';
+          div.style.boxShadow = '0 2px 8px #0001';
+          div.style.margin = '2rem auto';
+          div.style.maxWidth = '600px';
+          div.style.position = 'fixed';
+          div.style.top = '10%';
+          div.style.left = '0';
+          div.style.right = '0';
+          div.style.zIndex = '1000';
+          div.onclick = () => div.remove();
+          document.body.appendChild(div);
+        });
+    }
+
+    // Menú superior para login, registro, historial y configuración
+    function renderMenu() {
+      const menu = document.createElement('div');
+      menu.style.display = 'flex';
+      menu.style.justifyContent = 'space-between';
+      menu.style.alignItems = 'center';
+      menu.style.marginBottom = '1rem';
+      menu.innerHTML = `
+        <div>
+          <button id='btnLogin'>Iniciar sesión</button>
+          <button id='btnRegister'>Registrarse</button>
+          <button id='btnLogout' style='display:none;'>Cerrar sesión</button>
+        </div>
+        <div>
+          <button id='btnHistorial'>Historial</button>
+          <button id='btnTarifas'>Configurar Tarifas</button>
+        </div>
+      `;
+      document.querySelector('.container').insertBefore(menu, document.querySelector('.logo').nextSibling);
+      // Eventos
+      document.getElementById('btnLogin').onclick = showLogin;
+      document.getElementById('btnRegister').onclick = showRegister;
+      document.getElementById('btnLogout').onclick = logout;
+      document.getElementById('btnHistorial').onclick = showHistorial;
+      document.getElementById('btnTarifas').onclick = showTarifasConfig;
+    }
+
+    renderMenu();
   </script>
 </body>
 </html>
