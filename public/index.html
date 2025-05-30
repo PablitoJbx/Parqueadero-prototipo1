@@ -200,6 +200,95 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    .login-register {
+      background: #f8fafc;
+      padding: 2rem 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px #0001;
+      margin: 3rem auto 0 auto;
+      max-width: 350px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .login-register h2 {
+      margin-top: 0;
+      color: #2980b9;
+      text-align: left;
+      font-size: 1.3em;
+      font-weight: 700;
+    }
+    .login-register label {
+      margin-top: 1rem;
+      font-weight: 500;
+      color: #222e3a;
+      margin-bottom: 0.2rem;
+    }
+    .login-register input[type="text"],
+    .login-register input[type="password"] {
+      padding: 0.7rem;
+      margin-top: 0.2rem;
+      border-radius: 8px;
+      border: 1px solid #b0c4d6;
+      font-size: 1rem;
+      background: #eaf0f6;
+      transition: border 0.2s;
+      margin-bottom: 0.2rem;
+    }
+    .login-register input[type="text"]:focus,
+    .login-register input[type="password"]:focus {
+      border: 1.5px solid #2980b9;
+      outline: none;
+      background: #fff;
+    }
+    .login-register button[type="submit"] {
+      margin-top: 1.3rem;
+      padding: 0.8rem 0;
+      background: #2980b9;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #2980b933;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+    }
+    .login-register button[type="submit"]:hover {
+      background: #3498db;
+      box-shadow: 0 4px 16px #2980b933;
+      transform: translateY(-2px) scale(1.04);
+    }
+    .login-register #loginMsg, .login-register #registerMsg {
+      margin-top: 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      min-height: 1.2em;
+    }
+    .login-register .error { color: #e74c3c; }
+    .login-register .success { color: #27ae60; }
+    .login-register .switch-link {
+      margin-top: 1.5rem;
+      text-align: center;
+      font-size: 1em;
+    }
+    .login-register .switch-link a {
+      color: #2980b9;
+      text-decoration: underline;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .login-register .switch-link a:hover {
+      color: #1b6bb8;
+    }
+    @media (max-width: 600px) {
+      .login-register {
+        padding: 1.2rem 0.7rem;
+        max-width: 98vw;
+      }
+    }
   </style>
 </head>
 <body>
@@ -208,13 +297,13 @@
         <h2>Iniciar sesión</h2>
         <form id="loginForm">
           <label for="loginUser">Usuario</label>
-          <input id="loginUser" required maxlength="30" autocomplete="username" />
+          <input id="loginUser" type="text" required maxlength="30" autocomplete="username" />
           <label for="loginPass">Contraseña</label>
           <input id="loginPass" type="password" required maxlength="30" autocomplete="current-password" />
           <button type="submit">Entrar</button>
           <div id="loginMsg"></div>
         </form>
-        <div style="margin-top:1rem;text-align:center;">
+        <div class="switch-link">
           ¿No tienes cuenta? <a href="#" id="toRegister">Regístrate</a>
         </div>
       </div>
@@ -222,13 +311,13 @@
         <h2>Registro</h2>
         <form id="registerForm">
           <label for="registerUser">Usuario</label>
-          <input id="registerUser" required maxlength="30" autocomplete="username" />
+          <input id="registerUser" type="text" required maxlength="30" autocomplete="username" />
           <label for="registerPass">Contraseña</label>
           <input id="registerPass" type="password" required maxlength="30" autocomplete="new-password" />
           <button type="submit">Registrarse</button>
           <div id="registerMsg"></div>
         </form>
-        <div style="margin-top:1rem;text-align:center;">
+        <div class="switch-link">
           ¿Ya tienes cuenta? <a href="#" id="toLogin">Inicia sesión</a>
         </div>
       </div>
