@@ -98,38 +98,6 @@
       </div>
       <span class="logo-title">Parqueadero Prototipo</span>
     </div>
-    <form id="entradaForm">
-      <h2>Registrar Entrada</h2>
-      <label>Placa:
-        <input type="text" id="placaEntrada" required maxlength="10" autocomplete="off">
-      </label>
-      <label>Tipo:
-        <select id="tipoEntrada" required>
-          <option value="carro">Carro</option>
-          <option value="moto">Moto</option>
-        </select>
-      </label>
-      <button type="submit">Registrar Entrada</button>
-      <div id="entradaMsg"></div>
-    </form>
-    <form id="salidaForm">
-      <h2>Registrar Salida</h2>
-      <label>Placa:
-        <input type="text" id="placaSalida" required maxlength="10" autocomplete="off">
-      </label>
-      <button type="submit">Registrar Salida</button>
-      <div id="salidaMsg"></div>
-    </form>
-    <div class="vehiculos">
-      <h2>Vehículos en el Parqueadero</h2>
-      <table id="tablaVehiculos">
-        <thead>
-          <tr><th>Placa</th><th>Tipo</th><th>Hora Entrada</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-      <div id="tablaMsg"></div>
-    </div>
     <div class="login-register" id="authBox">
       <h2 id="authTitle">Iniciar Sesión</h2>
       <form id="loginForm">
@@ -142,7 +110,11 @@
         <button type="submit">Entrar</button>
         <div id="loginMsg"></div>
       </form>
-      <form id="registerForm" style="display:none;">
+      <div style="margin-top:1rem; text-align:center;">
+        <a href="#" id="showRegister">¿No tienes cuenta? Regístrate</a>
+      </div>
+      <form id="registerForm" style="display:none; margin-top:1.5rem;">
+        <h2>Registro</h2>
         <label>Usuario:
           <input type="text" id="registerUser" required autocomplete="off">
         </label>
@@ -151,10 +123,10 @@
         </label>
         <button type="submit">Registrar</button>
         <div id="registerMsg"></div>
+        <div style="margin-top:1rem; text-align:center;">
+          <a href="#" id="showLogin">¿Ya tienes cuenta? Inicia sesión</a>
+        </div>
       </form>
-      <div style="margin-top:1rem; text-align:center;">
-        <a href="#" id="toggleAuth">¿No tienes cuenta? Regístrate</a>
-      </div>
     </div>
     <div id="mainApp" style="display:none;">
       <h2 style="text-align:center;">Mapa del Parqueadero</h2>
@@ -265,22 +237,17 @@
     };
     // --- Login/Register logic ---
     let currentUser = null;
-    document.getElementById('toggleAuth').onclick = e => {
+    document.getElementById('showRegister').onclick = e => {
       e.preventDefault();
-      const loginForm = document.getElementById('loginForm');
-      const registerForm = document.getElementById('registerForm');
-      const authTitle = document.getElementById('authTitle');
-      if (loginForm.style.display !== 'none') {
-        loginForm.style.display = 'none';
-        registerForm.style.display = '';
-        authTitle.textContent = 'Registrarse';
-        document.getElementById('toggleAuth').textContent = '¿Ya tienes cuenta? Inicia sesión';
-      } else {
-        loginForm.style.display = '';
-        registerForm.style.display = 'none';
-        authTitle.textContent = 'Iniciar Sesión';
-        document.getElementById('toggleAuth').textContent = '¿No tienes cuenta? Regístrate';
-      }
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('registerForm').style.display = '';
+      document.getElementById('authTitle').textContent = 'Registro';
+    };
+    document.getElementById('showLogin').onclick = e => {
+      e.preventDefault();
+      document.getElementById('loginForm').style.display = '';
+      document.getElementById('registerForm').style.display = 'none';
+      document.getElementById('authTitle').textContent = 'Iniciar Sesión';
     };
     document.getElementById('loginForm').onsubmit = e => {
       e.preventDefault();
