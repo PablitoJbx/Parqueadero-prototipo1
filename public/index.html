@@ -132,10 +132,38 @@
         <button id='btnTarifas'>Configurar Tarifas</button>
       </div>
     </div>
+    <!-- Formularios y tabla funcionales -->
     <div id="mainApp">
       <h2 style="text-align:center;">Mapa del Parqueadero</h2>
       <div class="parking-map" id="parkingMap"></div>
       <div id="parkingMsg" style="text-align:center;"></div>
+      <form id="entradaForm">
+        <h3>Registrar Entrada</h3>
+        <label for="placaEntrada">Placa:</label>
+        <input id="placaEntrada" maxlength="10" required pattern="[A-Z0-9]{5,10}" placeholder="Ej: ABC123" />
+        <label for="tipoEntrada">Tipo:</label>
+        <select id="tipoEntrada">
+          <option value="carro">Carro</option>
+          <option value="moto">Moto</option>
+        </select>
+        <button type="submit">Registrar Entrada</button>
+        <div id="entradaMsg"></div>
+      </form>
+      <form id="salidaForm">
+        <h3>Registrar Salida</h3>
+        <label for="placaSalida">Placa:</label>
+        <input id="placaSalida" maxlength="10" required pattern="[A-Z0-9]{5,10}" placeholder="Ej: ABC123" />
+        <button type="submit">Registrar Salida</button>
+        <div id="salidaMsg"></div>
+      </form>
+      <div class="vehiculos">
+        <h3>Vehículos en el Parqueadero</h3>
+        <table id="tablaVehiculos">
+          <thead><tr><th>Placa</th><th>Tipo</th><th>Hora de Entrada</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div id="tablaMsg"></div>
+      </div>
     </div>
   </div>
   <script>
@@ -365,10 +393,6 @@
     loadParkingState();
     renderParkingMap();
     setInterval(cargarVehiculos, 10000);
-    // Mostrar login/register al cargar
-    document.getElementById('authBox').style.display = '';
-    document.getElementById('mainApp').style.display = 'none';
-
     // Mostrar/ocultar botones según sesión
     function updateMenuSession() {
       const token = localStorage.getItem('token');
@@ -381,8 +405,17 @@
     }
 
     // Llamar al cargar y tras login/logout
-    renderMenu();
     updateMenuSession();
+
+    // Asignar eventos a los botones del menú superior
+    function assignMenuEvents() {
+      document.getElementById('btnLogin').onclick = showLogin;
+      document.getElementById('btnRegister').onclick = showRegister;
+      document.getElementById('btnLogout').onclick = logout;
+      document.getElementById('btnHistorial').onclick = showHistorial;
+      document.getElementById('btnTarifas').onclick = showTarifasConfig;
+    }
+    assignMenuEvents();
 
     // Lógica de login, registro y logout
     function showLogin() {
