@@ -50,6 +50,43 @@
       .container { padding: 1rem; }
       .logo-title { font-size: 1.3rem; }
     }
+    .login-register {
+      background: #f8fafc;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px #0001;
+      margin-bottom: 2rem;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .login-register h2 { margin-top: 0; }
+    .parking-map {
+      display: grid;
+      grid-template-columns: repeat(5, 60px);
+      gap: 16px;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+    .space {
+      width: 60px; height: 80px;
+      background: #dbe6f3;
+      border-radius: 8px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      box-shadow: 0 2px 6px #0001;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.2s;
+    }
+    .space.occupied { background: #e74c3c; color: #fff; }
+    .space.selected { background: #2980b9; color: #fff; }
+    .space .placa { font-size: 0.9rem; font-weight: bold; margin-top: 0.3rem; }
+    .space .tipo { font-size: 0.8rem; }
+    .space .actions { margin-top: 0.5rem; display: flex; gap: 4px; }
+    .space button { padding: 0.2rem 0.5rem; font-size: 0.8rem; border-radius: 4px; border: none; cursor: pointer; }
+    .space button.add { background: #27ae60; color: #fff; }
+    .space button.remove { background: #e67e22; color: #fff; }
+    .space button:disabled { background: #ccc; color: #fff; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -92,6 +129,37 @@
         <tbody></tbody>
       </table>
       <div id="tablaMsg"></div>
+    </div>
+    <div class="login-register" id="authBox">
+      <h2 id="authTitle">Iniciar Sesión</h2>
+      <form id="loginForm">
+        <label>Usuario:
+          <input type="text" id="loginUser" required autocomplete="off">
+        </label>
+        <label>Contraseña:
+          <input type="password" id="loginPass" required>
+        </label>
+        <button type="submit">Entrar</button>
+        <div id="loginMsg"></div>
+      </form>
+      <form id="registerForm" style="display:none;">
+        <label>Usuario:
+          <input type="text" id="registerUser" required autocomplete="off">
+        </label>
+        <label>Contraseña:
+          <input type="password" id="registerPass" required>
+        </label>
+        <button type="submit">Registrar</button>
+        <div id="registerMsg"></div>
+      </form>
+      <div style="margin-top:1rem; text-align:center;">
+        <a href="#" id="toggleAuth">¿No tienes cuenta? Regístrate</a>
+      </div>
+    </div>
+    <div id="mainApp" style="display:none;">
+      <h2 style="text-align:center;">Mapa del Parqueadero</h2>
+      <div class="parking-map" id="parkingMap"></div>
+      <div id="parkingMsg" style="text-align:center;"></div>
     </div>
   </div>
   <script>
@@ -195,8 +263,91 @@
         msg.className = 'error';
       }
     };
+    // --- Login/Register logic ---
+    let currentUser = null;
+    document.getElementById('toggleAuth').onclick = e => {
+      e.preventDefault();
+      const loginForm = document.getElementById('loginForm');
+      const registerForm = document.getElementById('registerForm');
+      const authTitle = document.getElementById('authTitle');
+      if (loginForm.style.display !== 'none') {
+        loginForm.style.display = 'none';
+        registerForm.style.display = '';
+        authTitle.textContent = 'Registrarse';
+        document.getElementById('toggleAuth').textContent = '¿Ya tienes cuenta? Inicia sesión';
+      } else {
+        loginForm.style.display = '';
+        registerForm.style.display = 'none';
+        authTitle.textContent = 'Iniciar Sesión';
+        document.getElementById('toggleAuth').textContent = '¿No tienes cuenta? Regístrate';
+      }
+    };
+    document.getElementById('loginForm').onsubmit = e => {
+      e.preventDefault();
+      // Simulación de login (sin backend real)
+      const user = document.getElementById('loginUser').value;
+      const pass = document.getElementById('loginPass').value;
+      if (localStorage.getItem('user_' + user) === pass) {
+        currentUser = user;
+        document.getElementById('authBox').style.display = 'none';
+        document.getElementById('mainApp').style.display = '';
+        renderParkingMap();
+      } else {
+        document.getElementById('loginMsg').textContent = 'Usuario o contraseña incorrectos';
+        document.getElementById('loginMsg').className = 'error';
+      }
+    };
+    document.getElementById('registerForm').onsubmit = e => {
+      e.preventDefault();
+      const user = document.getElementById('registerUser').value;
+      const pass = document.getElementById('registerPass').value;
+      if (localStorage.getItem('user_' + user)) {
+        document.getElementById('registerMsg').textContent = 'El usuario ya existe';
+        document.getElementById('registerMsg').className = 'error';
+      } else {
+        localStorage.setItem('user_' + user, pass);
+        document.getElementById('registerMsg').textContent = 'Usuario registrado. Ahora puedes iniciar sesión.';
+        document.getElementById('registerMsg').className = 'success';
+      }
+    };
+    // --- Parking map logic ---
+    const NUM_SPACES = 15;
+    let parkingSpaces = Array(NUM_SPACES).fill(null);
+    function renderParkingMap() {
+      const map = document.getElementById('parkingMap');
+      map.innerHTML = '';
+      parkingSpaces.forEach((car, idx) => {
+        const div = document.createElement('div');
+        div.className = 'space' + (car ? ' occupied' : '');
+        if (car) {
+          div.innerHTML = `<span class="placa">${car.placa}</span><span class="tipo">${car.tipo}</span><div class="actions"><button class="remove">Sacar</button></div>`;
+          div.querySelector('.remove').onclick = () => {
+            parkingSpaces[idx] = null;
+            renderParkingMap();
+            document.getElementById('parkingMsg').textContent = `Vehículo retirado del espacio ${idx+1}`;
+          };
+        } else {
+          div.innerHTML = `<div class="actions"><button class="add">Agregar</button></div>`;
+          div.querySelector('.add').onclick = () => {
+            const placa = prompt('Placa del vehículo:').toUpperCase();
+            const tipo = prompt('Tipo (carro/moto):').toLowerCase();
+            if (!placa.match(/^[A-Z0-9]{5,10}$/) || (tipo !== 'carro' && tipo !== 'moto')) {
+              alert('Datos inválidos.');
+              return;
+            }
+            parkingSpaces[idx] = { placa, tipo };
+            renderParkingMap();
+            document.getElementById('parkingMsg').textContent = `Vehículo agregado al espacio ${idx+1}`;
+          };
+        }
+        map.appendChild(div);
+      });
+    }
     cargarVehiculos();
     setInterval(cargarVehiculos, 10000);
+    // Mostrar login/register al cargar
+    document.getElementById('authBox').style.display = '';
+    document.getElementById('mainApp').style.display = 'none';
   </script>
 </body>
 </html>
