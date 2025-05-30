@@ -98,37 +98,7 @@
       </div>
       <span class="logo-title">Parqueadero Prototipo</span>
     </div>
-    <div class="login-register" id="authBox">
-      <h2 id="authTitle">Iniciar Sesión</h2>
-      <form id="loginForm">
-        <label>Usuario:
-          <input type="text" id="loginUser" required autocomplete="off">
-        </label>
-        <label>Contraseña:
-          <input type="password" id="loginPass" required>
-        </label>
-        <button type="submit">Entrar</button>
-        <div id="loginMsg"></div>
-      </form>
-      <div style="margin-top:1rem; text-align:center;">
-        <a href="#" id="showRegister">¿No tienes cuenta? Regístrate</a>
-      </div>
-      <form id="registerForm" style="display:none; margin-top:1.5rem;">
-        <h2>Registro</h2>
-        <label>Usuario:
-          <input type="text" id="registerUser" required autocomplete="off">
-        </label>
-        <label>Contraseña:
-          <input type="password" id="registerPass" required>
-        </label>
-        <button type="submit">Registrar</button>
-        <div id="registerMsg"></div>
-        <div style="margin-top:1rem; text-align:center;">
-          <a href="#" id="showLogin">¿Ya tienes cuenta? Inicia sesión</a>
-        </div>
-      </form>
-    </div>
-    <div id="mainApp" style="display:none;">
+    <div id="mainApp">
       <h2 style="text-align:center;">Mapa del Parqueadero</h2>
       <div class="parking-map" id="parkingMap"></div>
       <div id="parkingMsg" style="text-align:center;"></div>
@@ -235,65 +205,6 @@
         msg.className = 'error';
       }
     };
-    // --- Login/Register logic ---
-    let currentUser = null;
-    document.getElementById('showRegister').onclick = e => {
-      e.preventDefault();
-      document.getElementById('loginForm').style.display = 'none';
-      document.getElementById('registerForm').style.display = '';
-      document.getElementById('authTitle').textContent = 'Registro';
-      // Limpiar mensajes y campos
-      document.getElementById('loginMsg').textContent = '';
-      document.getElementById('registerMsg').textContent = '';
-      document.getElementById('registerForm').reset();
-      document.getElementById('registerUser').focus();
-    };
-    document.getElementById('showLogin').onclick = e => {
-      e.preventDefault();
-      document.getElementById('loginForm').style.display = '';
-      document.getElementById('registerForm').style.display = 'none';
-      document.getElementById('authTitle').textContent = 'Iniciar Sesión';
-      // Limpiar mensajes y campos
-      document.getElementById('registerMsg').textContent = '';
-      document.getElementById('loginMsg').textContent = '';
-      document.getElementById('loginForm').reset();
-      document.getElementById('loginUser').focus();
-    };
-    document.getElementById('loginForm').onsubmit = e => {
-      e.preventDefault();
-      // Simulación de login (sin backend real)
-      const user = document.getElementById('loginUser').value;
-      const pass = document.getElementById('loginPass').value;
-      if (localStorage.getItem('user_' + user) === pass) {
-        currentUser = user;
-        document.getElementById('authBox').style.display = 'none';
-        document.getElementById('mainApp').style.display = '';
-        renderParkingMap();
-      } else {
-        document.getElementById('loginMsg').textContent = 'Usuario o contraseña incorrectos';
-        document.getElementById('loginMsg').className = 'error';
-      }
-    };
-    document.getElementById('registerForm').onsubmit = e => {
-      e.preventDefault();
-      const user = document.getElementById('registerUser').value;
-      const pass = document.getElementById('registerPass').value;
-      if (!user || !pass) {
-        document.getElementById('registerMsg').textContent = 'Debes ingresar usuario y contraseña';
-        document.getElementById('registerMsg').className = 'error';
-        return;
-      }
-      if (localStorage.getItem('user_' + user)) {
-        document.getElementById('registerMsg').textContent = 'El usuario ya existe';
-        document.getElementById('registerMsg').className = 'error';
-      } else {
-        localStorage.setItem('user_' + user, pass);
-        document.getElementById('registerMsg').textContent = 'Usuario registrado. Ahora puedes iniciar sesión.';
-        document.getElementById('registerMsg').className = 'success';
-        // Opcional: cambiar automáticamente a login después de registrar
-        // setTimeout(() => document.getElementById('showLogin').click(), 1200);
-      }
-    };
     // --- Parking map logic ---
     const NUM_SPACES = 15;
     let parkingSpaces = Array(NUM_SPACES).fill(null);
@@ -327,7 +238,7 @@
         map.appendChild(div);
       });
     }
-    cargarVehiculos();
+    renderParkingMap();
     setInterval(cargarVehiculos, 10000);
     // Mostrar login/register al cargar
     document.getElementById('authBox').style.display = '';
