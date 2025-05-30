@@ -8,203 +8,268 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Montserrat', Arial, sans-serif; margin: 0; background: #eaf0f6; }
-    .container { max-width: 600px; margin: 2rem auto; padding: 2rem; background: #fff; border-radius: 16px; box-shadow: 0 4px 24px #0002; }
-    .logo {
-      display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Montserrat', Arial, sans-serif;
+      background: #eaf0f6;
+      min-height: 100vh;
+      width: 100vw;
+      overflow-x: hidden;
     }
-    .logo-icon {
+    body {
+      display: flex;
+      min-height: 100vh;
+      min-width: 100vw;
+    }
+    .sidebar {
+      width: 240px;
+      background: #222e3a;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 0 1rem 0;
+      box-shadow: 2px 0 16px #0002;
+      min-height: 100vh;
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      z-index: 100;
+    }
+    .sidebar .logo {
+      margin-bottom: 2.5rem;
+    }
+    .sidebar .logo-icon {
       width: 56px; height: 56px; background: #2980b9; border-radius: 50%; display: flex; align-items: center; justify-content: center;
     }
-    .logo-icon svg { width: 36px; height: 36px; fill: #fff; }
-    .logo-title { font-size: 2rem; font-weight: 700; color: #2980b9; letter-spacing: 1px; }
-    h2 { color: #2c3e50; margin-top: 2rem; }
-    form, .vehiculos { background: #f8fafc; padding: 1.5rem; margin-bottom: 2rem; border-radius: 12px; box-shadow: 0 2px 8px #0001; }
-    label { display: block; margin-top: 1rem; font-weight: 500; }
-    input, select { padding: 0.5rem; margin-top: 0.5rem; width: 100%; border-radius: 6px; border: 1px solid #b0c4d6; font-size: 1rem; }
-    button { margin-top: 1rem; padding: 0.7rem 1.5rem; background: #2980b9; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: background 0.2s; }
-    button:hover { background: #3498db; }
-    .error, .success { margin-top: 1rem; font-size: 1rem; font-weight: 600; }
-    .error { color: #e74c3c; }
-    .success { color: #27ae60; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { padding: 0.7rem; border-bottom: 1px solid #dbe6f3; text-align: center; }
-    th { background: #2980b9; color: #fff; font-weight: 700; }
-    tr:last-child td { border-bottom: none; }
-    .spinner {
-      display: inline-block;
-      width: 24px;
-      height: 24px;
-      border: 3px solid #2980b9;
-      border-top: 3px solid #fff;
+    .sidebar .logo-title {
+      font-size: 1.3rem; font-weight: 700; color: #fff; letter-spacing: 1px; margin-top: 0.7rem;
+      text-align: center;
+    }
+    .sidebar-menu {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      margin-bottom: auto;
+    }
+    .sidebar-menu button {
+      width: 90%;
+      margin: 0 auto;
+      padding: 0.9rem 1rem;
+      background: #2980b9;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+      box-shadow: 0 2px 8px #0001;
+    }
+    .sidebar-menu button.active, .sidebar-menu button:hover {
+      background: #1b6bb8;
+      box-shadow: 0 4px 16px #0002;
+      transform: scale(1.06);
+    }
+    .sidebar-menu button:active {
+      transform: scale(0.97);
+      box-shadow: 0 1px 4px #0003;
+    }
+    .sidebar-menu .icon {
+      font-size: 1.3em;
+      margin-right: 0.5em;
+    }
+    .sidebar-footer {
+      margin-top: 2rem;
+      text-align: center;
+      width: 100%;
+    }
+    .sidebar-footer img {
+      width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid #2980b9; box-shadow: 0 2px 8px #0002;
+    }
+    .sidebar-footer .dev-name {
+      font-size: 1em; font-weight: 600; color: #fff; margin-top: 0.5em;
+    }
+    .sidebar-footer .dev-desc {
+      font-size: 0.9em; color: #b0c4d6;
+    }
+    .main-content {
+      margin-left: 240px;
+      width: calc(100vw - 240px);
+      min-height: 100vh;
+      background: #eaf0f6;
+      padding: 2.5rem 2rem 2rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: margin 0.2s, width 0.2s;
+    }
+    @media (max-width: 900px) {
+      .sidebar { width: 70px; }
+      .sidebar .logo-title, .sidebar-footer .dev-name, .sidebar-footer .dev-desc { display: none; }
+      .main-content { margin-left: 70px; width: calc(100vw - 70px); padding: 1.2rem 0.5rem; }
+      .sidebar-menu button { font-size: 1.1em; justify-content: center; gap: 0; }
+      .sidebar-menu .icon { margin-right: 0; }
+    }
+    /* Moderniza formularios y tablas */
+    .main-content form, .main-content .vehiculos, .main-content .panel {
+      background: #fff;
+      padding: 2rem 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px #0001;
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 600px;
+    }
+    .main-content h2, .main-content h3 { color: #2980b9; }
+    .main-content table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    .main-content th, .main-content td { padding: 0.7rem; border-bottom: 1px solid #dbe6f3; text-align: center; }
+    .main-content th { background: #2980b9; color: #fff; font-weight: 700; }
+    .main-content tr:last-child td { border-bottom: none; }
+    /* Modal de pago */
+    #modalPago { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#0008; z-index:2000; align-items:center; justify-content:center; }
+    #modalPago .modal-content { background:#fff; padding:2rem 2.5rem; border-radius:18px; box-shadow:0 8px 32px #0004; max-width:340px; text-align:center; position:relative; }
+    #modalPago .pay-method { margin:0.5em; }
+    /* Toast notification styles */
+    #toast {
+      visibility: hidden;
+      min-width: 240px;
+      background: #222e3a;
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      padding: 1em 2em;
+      position: fixed;
+      z-index: 3000;
+      left: 50%;
+      bottom: 40px;
+      transform: translateX(-50%) scale(0.95);
+      font-size: 1.1em;
+      opacity: 0;
+      transition: opacity 0.4s, transform 0.3s;
+      box-shadow: 0 4px 24px #0004;
+    }
+    #toast.show {
+      visibility: visible;
+      opacity: 1;
+      transform: translateX(-50%) scale(1.04);
+    }
+    /* Animación para espacios del mapa */
+    .parking-map .space {
+      transition: box-shadow 0.2s, background 0.2s, transform 0.25s;
+    }
+    .parking-map .space.added {
+      animation: popIn 0.5s cubic-bezier(.68,-0.55,.27,1.55);
+    }
+    .parking-map .space.removed {
+      animation: fadeOut 0.4s cubic-bezier(.68,-0.55,.27,1.55);
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.7); opacity: 0; }
+      80% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes fadeOut {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.7); }
+    }
+    /* Loader */
+    #loader {
+      display: none;
+      position: fixed;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      background: #eaf0f6cc;
+      z-index: 4000;
+      align-items: center;
+      justify-content: center;
+    }
+    #loader .spinner {
+      width: 60px; height: 60px;
+      border: 7px solid #2980b9;
+      border-top: 7px solid #fff;
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      vertical-align: middle;
-      margin-right: 8px;
     }
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    @media (max-width: 700px) {
-      .container { padding: 1rem; }
-      .logo-title { font-size: 1.3rem; }
-    }
-    .login-register {
-      background: #f8fafc;
-      padding: 1.5rem;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px #0001;
-      margin-bottom: 2rem;
-      max-width: 400px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .login-register h2 { margin-top: 0; }
-    .parking-map {
-      display: grid;
-      grid-template-columns: repeat(5, 60px);
-      gap: 16px;
-      justify-content: center;
-      margin: 2rem 0;
-    }
-    .space {
-      width: 60px; height: 80px;
-      background: #dbe6f3;
-      border-radius: 8px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      box-shadow: 0 2px 6px #0001;
-      cursor: pointer;
-      position: relative;
-      transition: background 0.2s;
-    }
-    .space.occupied { background: #e74c3c; color: #fff; }
-    .space.selected { background: #2980b9; color: #fff; }
-    .space .placa { font-size: 0.9rem; font-weight: bold; margin-top: 0.3rem; }
-    .space .tipo { font-size: 0.8rem; }
-    .space .actions { margin-top: 0.5rem; display: flex; gap: 4px; }
-    .space button { padding: 0.2rem 0.5rem; font-size: 0.8rem; border-radius: 4px; border: none; cursor: pointer; }
-    .space button.add { background: #27ae60; color: #fff; }
-    .space button.remove { background: #e67e22; color: #fff; }
-    .space button:disabled { background: #ccc; color: #fff; cursor: not-allowed; }
-    /* Estilos para el menú superior */
-    .menu-superior {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    .menu-superior button {
-      background: #2980b9;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 600;
-      transition: background 0.2s;
-      margin-left: 0.5rem;
-    }
-    .menu-superior button:hover {
-      background: #3498db;
-    }
   </style>
 </head>
 <body>
-    <div id="logoutFixed" style="display:none;position:fixed;top:24px;left:24px;z-index:1000;">
-      <button id="btnLogoutFixed" style="background:#e74c3c;color:#fff;padding:0.7rem 1.2rem;border:none;border-radius:8px;font-weight:700;font-size:1rem;box-shadow:0 2px 8px #0002;cursor:pointer;">Cerrar sesión</button>
-    </div>
-    <div class="container">
-    <div class="logo">
-      <div class="logo-icon">
-        <!-- Simple parking logo SVG -->
-        <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#fff"/><rect x="14" y="14" width="20" height="20" rx="6" fill="#2980b9"/><text x="24" y="32" text-anchor="middle" font-size="18" fill="#fff" font-family="Arial" font-weight="bold">P</text></svg>
-      </div>
-      <span class="logo-title">Parqueadero Prototipo</span>
-    </div>
-    <!-- Menú superior para login, registro, historial y configuración -->
-    <div class="menu-superior">
-      <div id="menu-session">
-        <button id='btnLogin'>Iniciar sesión</button>
-        <button id='btnRegister'>Registrarse</button>
-        <button id='btnLogout' style='display:none;'>Cerrar sesión</button>
-      </div>
-      <div>
-        <button id='btnHistorial'>Historial</button>
-        <button id='btnTarifas'>Configurar Tarifas</button>
-      </div>
-    </div>
-    <!-- Formularios de login y registro -->
-    <div id="loginRegisterPanel" style="display:none;">
-      <div class="login-register" id="loginPanel" style="display:none;">
-        <h2>Iniciar sesión</h2>
-        <form id="loginForm">
-          <label for="loginUser">Usuario</label>
-          <input id="loginUser" required maxlength="30" autocomplete="username" />
-          <label for="loginPass">Contraseña</label>
-          <input id="loginPass" type="password" required maxlength="30" autocomplete="current-password" />
-          <button type="submit">Entrar</button>
-          <div id="loginMsg"></div>
-        </form>
-        <div style="margin-top:1rem;text-align:center;">
-          ¿No tienes cuenta? <a href="#" id="toRegister">Regístrate</a>
+    <div class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">
+          <!-- Simple parking logo SVG -->
+          <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#fff"/><rect x="14" y="14" width="20" height="20" rx="6" fill="#2980b9"/><text x="24" y="32" text-anchor="middle" font-size="18" fill="#fff" font-family="Arial" font-weight="bold">P</text></svg>
         </div>
+        <div class="logo-title">Parqueadero</div>
       </div>
-      <div class="login-register" id="registerPanel" style="display:none;">
-        <h2>Registro</h2>
-        <form id="registerForm">
-          <label for="registerUser">Usuario</label>
-          <input id="registerUser" required maxlength="30" autocomplete="username" />
-          <label for="registerPass">Contraseña</label>
-          <input id="registerPass" type="password" required maxlength="30" autocomplete="new-password" />
-          <button type="submit">Registrarse</button>
-          <div id="registerMsg"></div>
-        </form>
-        <div style="margin-top:1rem;text-align:center;">
-          ¿Ya tienes cuenta? <a href="#" id="toLogin">Inicia sesión</a>
-        </div>
+      <div class="sidebar-menu">
+        <button id="menuMapa" class="active"><span class="icon">🗺️</span>Mapa del parqueadero</button>
+        <button id="menuPagos"><span class="icon">💳</span>Pagos</button>
+        <button id="menuGestion"><span class="icon">🚗</span>Gestionar carros/motos</button>
+        <button id="menuLogout"><span class="icon">🚪</span>Cerrar sesión</button>
+      </div>
+      <div class="sidebar-footer">
+        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Foto programador">
+        <div class="dev-name">David Niño y equipo</div>
+        <div class="dev-desc">Desarrolladores del sistema de parqueadero profesional</div>
       </div>
     </div>
-    <!-- Main app (oculto si no hay sesión) -->
-    <div id="mainApp" style="display:none;">
-      <h2 style="text-align:center;">Mapa del Parqueadero</h2>
-      <div id="infoEntrada" style="text-align:center;margin:1rem 0 2rem 0;font-weight:bold;color:#2980b9;">
-        Para registrar la entrada de un vehículo, haz clic en un espacio vacío del mapa.
+    <div class="main-content">
+      <div id="panelMapa" class="panel">
+        <h2>Mapa del Parqueadero</h2>
+        <div id="infoEntrada" style="text-align:center;margin:1rem 0 2rem 0;font-weight:bold;color:#2980b9;">
+          Para registrar la entrada de un vehículo, haz clic en un espacio vacío del mapa.
+        </div>
+        <div class="parking-map" id="parkingMap"></div>
+        <div id="parkingMsg" style="text-align:center;"></div>
       </div>
-      <div class="parking-map" id="parkingMap"></div>
-      <div id="parkingMsg" style="text-align:center;"></div>
-      <form id="entradaForm" style="display:none;">
-        <h3>Registrar Entrada</h3>
-        <label for="placaEntrada">Placa:</label>
-        <input id="placaEntrada" maxlength="10" required pattern="[A-Z0-9]{5,10}" placeholder="Ej: ABC123" />
-        <label for="tipoEntrada">Tipo:</label>
-        <select id="tipoEntrada">
-          <option value="carro">Carro</option>
-          <option value="moto">Moto</option>
-        </select>
-        <button type="submit">Registrar Entrada</button>
-        <div id="entradaMsg"></div>
-      </form>
-      <form id="salidaForm">
-        <h3>Registrar Salida</h3>
-        <label for="placaSalida">Placa:</label>
-        <input id="placaSalida" maxlength="10" required pattern="[A-Z0-9]{5,10}" placeholder="Ej: ABC123" />
-        <button type="submit">Registrar Salida</button>
-        <div id="salidaMsg"></div>
-      </form>
-      <div class="vehiculos">
-        <h3>Vehículos en el Parqueadero</h3>
-        <table id="tablaVehiculos">
-          <thead><tr><th>Placa</th><th>Tipo</th><th>Hora de Entrada</th></tr></thead>
-          <tbody></tbody>
-        </table>
-        <div id="tablaMsg"></div>
+      <div id="panelPagos" class="panel" style="display:none;">
+        <h2>Pagos</h2>
+        <div id="pagosContent">Selecciona un vehículo en el mapa para realizar el pago de salida.</div>
+      </div>
+      <div id="panelGestion" class="panel" style="display:none;">
+        <h2>Gestionar Carros/Motos</h2>
+        <form id="entradaForm">
+          <h3>Registrar Entrada</h3>
+          <label for="placaEntrada">Placa:</label>
+          <input id="placaEntrada" maxlength="10" required pattern="[A-Z0-9]{5,10}" placeholder="Ej: ABC123" />
+          <label for="tipoEntrada">Tipo:</label>
+          <select id="tipoEntrada">
+            <option value="carro">Carro</option>
+            <option value="moto">Moto</option>
+          </select>
+          <button type="submit">Registrar Entrada</button>
+          <div id="entradaMsg"></div>
+        </form>
+        <form id="salidaForm">
+          <h3>Registrar Salida</h3>
+          <label for="placaSalida">Placa:</label>
+          <input id="placaSalida" maxlength="10" required pattern="[A-Z0-9]{5,10}" placeholder="Ej: ABC123" />
+          <button type="submit">Registrar Salida</button>
+          <div id="salidaMsg"></div>
+        </form>
+        <div class="vehiculos">
+          <h3>Vehículos en el Parqueadero</h3>
+          <table id="tablaVehiculos">
+            <thead><tr><th>Placa</th><th>Tipo</th><th>Hora de Entrada</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div id="tablaMsg"></div>
+        </div>
       </div>
     </div>
     <!-- Modal de métodos de pago -->
-    <div id="modalPago" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0008;z-index:2000;align-items:center;justify-content:center;">
-      <div style="background:#fff;padding:2rem 2.5rem;border-radius:18px;box-shadow:0 8px 32px #0004;max-width:340px;text-align:center;position:relative;">
+    <div id="modalPago">
+      <div class="modal-content">
         <h3 style="margin-top:0;">Selecciona método de pago</h3>
         <div id="paymentAmount" style="font-size:1.2em;font-weight:600;margin-bottom:1.2em;"></div>
         <div style="display:flex;gap:1.2em;justify-content:center;flex-wrap:wrap;">
@@ -216,15 +281,8 @@
         <button id="closePaymentModal" style="margin-top:1.5em;background:#bbb;">Cancelar</button>
       </div>
     </div>
-    <!-- Espacio para foto de los programadores -->
-    <footer style="margin-top:3rem;padding:2rem 0 1rem 0;background:#f8fafc;border-radius:18px 18px 0 0;box-shadow:0 -2px 12px #0001;text-align:center;">
-      <div style="margin-bottom:1rem;">
-        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Foto programador" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:4px solid #2980b9;box-shadow:0 2px 8px #0002;">
-      </div>
-      <div style="font-size:1.1em;font-weight:600;color:#2980b9;">David Niño y equipo</div>
-      <div style="font-size:0.95em;color:#555;">Desarrolladores del sistema de parqueadero profesional</div>
-    </footer>
-  </div>
+    <div id="loader"><div class="spinner"></div></div>
+    <div id="toast"></div>
   <script>
     const api = '';
     // --- Login/Register logic ---
@@ -619,6 +677,94 @@
     document.addEventListener('DOMContentLoaded', () => {
       cargarVehiculos();
     });
+
+    // --- Menú lateral navegación ---
+    function showPanel(panel) {
+      document.getElementById('panelMapa').style.display = 'none';
+      document.getElementById('panelPagos').style.display = 'none';
+      document.getElementById('panelGestion').style.display = 'none';
+      document.getElementById(panel).style.display = '';
+      document.getElementById('menuMapa').classList.remove('active');
+      document.getElementById('menuPagos').classList.remove('active');
+      document.getElementById('menuGestion').classList.remove('active');
+      if(panel==='panelMapa') document.getElementById('menuMapa').classList.add('active');
+      if(panel==='panelPagos') document.getElementById('menuPagos').classList.add('active');
+      if(panel==='panelGestion') document.getElementById('menuGestion').classList.add('active');
+    }
+    document.getElementById('menuMapa').onclick = () => showPanel('panelMapa');
+    document.getElementById('menuPagos').onclick = () => showPanel('panelPagos');
+    document.getElementById('menuGestion').onclick = () => { showPanel('panelGestion'); cargarVehiculos(); };
+    document.getElementById('menuLogout').onclick = () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('rol');
+      location.reload();
+    };
+    // Mostrar panel principal al iniciar
+    showPanel('panelMapa');
+
+    // Toast notification
+    function showToast(msg, type = 'info') {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.background = type === 'error' ? '#e74c3c' : (type === 'success' ? '#27ae60' : '#222e3a');
+      toast.className = 'show';
+      setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 2600);
+    }
+    // Loader
+    function showLoader() {
+      document.getElementById('loader').style.display = 'flex';
+    }
+    function hideLoader() {
+      document.getElementById('loader').style.display = 'none';
+    }
+    // Confirmación visual antes de retirar vehículo
+    async function confirmAction(msg) {
+      return new Promise(resolve => {
+        const modal = document.createElement('div');
+        modal.style.position = 'fixed';
+        modal.style.left = 0;
+        modal.style.top = 0;
+        modal.style.width = '100vw';
+        modal.style.height = '100vh';
+        modal.style.background = '#0007';
+        modal.style.zIndex = 3001;
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.innerHTML = `<div style="background:#fff;padding:2em 2.5em;border-radius:16px;box-shadow:0 8px 32px #0004;text-align:center;max-width:340px;">
+          <div style='font-size:1.2em;margin-bottom:1.2em;color:#222e3a;'>${msg}</div>
+          <button id='confirmYes' style='background:#27ae60;margin-right:1em;'>Sí</button>
+          <button id='confirmNo' style='background:#e74c3c;'>No</button>
+        </div>`;
+        document.body.appendChild(modal);
+        document.getElementById('confirmYes').onclick = () => { document.body.removeChild(modal); resolve(true); };
+        document.getElementById('confirmNo').onclick = () => { document.body.removeChild(modal); resolve(false); };
+      });
+    }
+    // Animación en el mapa al agregar/quitar vehículo
+    const oldRenderParkingMap = document.renderParkingMap;
+    document.renderParkingMap = async function() {
+      const map = document.getElementById('parkingMap');
+      const prev = Array.from(map.children).map(div => div && div.querySelector('.placa') ? div.querySelector('.placa').textContent : null);
+      await oldRenderParkingMap();
+      const curr = Array.from(map.children).map(div => div && div.querySelector('.placa') ? div.querySelector('.placa').textContent : null);
+      map.childNodes.forEach((div, i) => {
+        if (curr[i] && !prev[i]) div.classList.add('added');
+        if (!curr[i] && prev[i]) div.classList.add('removed');
+      });
+    };
+    // Mostrar loader al cargar vehículos
+    const oldCargarVehiculos = cargarVehiculos;
+    async function cargarVehiculos() {
+      showLoader();
+      await oldCargarVehiculos();
+      hideLoader();
+    }
+    // Reemplazar alert por showToast
+    // Ejemplo: showToast('Mensaje', 'success');
+    // Confirmación visual antes de retirar vehículo en el mapa
+    // Dentro de la función onclick de salida de vehículo:
+    // if (await confirmAction('¿Seguro que deseas retirar este vehículo?')) { ... }
   </script>
 </body>
 </html>
